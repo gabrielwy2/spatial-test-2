@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Spatial Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align:center; margin:0; padding:40px; background:#f5f5f5; }
+        #quiz, #results { display:none; }
+        img { max-width:90vw; max-height:60vh; border:2px solid #ddd; margin:20px 0; }
+        button { font-size:20px; padding:15px 25px; margin:10px; cursor:pointer; border:none; border-radius:8px; }
+        .option { background:#e0e0e0; color:#333; }
+        #start { max-width:600px; margin:0 auto; }
+        .yes-btn { background:#90EE90; color:#006400; font-size:24px; padding:25px 50px; }
+    </style>
+</head>
+<body>
+    <div id="start">
+        <h1>Thank you for doing the spatial test.</h1>
+        <p>There are total 11 question. please choose the right answer. All answer will be record as well as its answer time.</p>
+        <button onclick="startTest()" style="background:#4CAF50; color:white; font-size:24px; padding:20px 40px;">OK</button>
+    </div>
+
+    <div id="quiz">
+        <h2 id="quiz-title">Choose the right answer.</h2>
+        <img id="question-img" src="" alt="Question">
+        <div id="options"></div>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        const images = Array.from({length:12}, (_,i) => `q${i+1}.png`);
+        const correctAnswers = ['D','D','B','A','A','Yes','C','D','A','D','A','A'];
+        let index = 0, startTime = 0, logs = [];
+
+        function startTest() {
+            document.getElementById('start').style.display = 'none';
+            document.getElementById('quiz').style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (index >= 12) { showResults(); return; }
+            document.getElementById('question-img').src = images[index];
+            
+            document.getElementById('quiz-title').textContent = 
+                index === 5 ? "Please notice in coming questions." : "Choose the right answer.";
+            
+            const isQ6 = index === 5;
+            let optionsHtml = isQ6 ? 
+                '<button class="yes-btn" onclick="answer(\'Yes\')">Yes</button>' :
+                '<button class="option" onclick="answer(\'A\')">A</button><button class="option" onclick="answer(\'B\')">B</button><button class="option" onclick="answer(\'C\')">C</button><button class="option" onclick="answer(\'D\')">D</button>';
+            document.getElementById('options').innerHTML = optionsHtml;
+            startTime = Date.now();
+        }
+
+        function answer(choice) {
+            const rt = ((Date.now() - startTime) / 1000).toFixed(2);
+            const correct = choice === correctAnswers[index];
+            logs.push({q: index+1, choice, correct, time: rt});
+            index++;
+            setTimeout(loadQuestion, 300);
+        }
+
+        function showResults() {
+            document.getElementById('quiz').style.display = 'none';
+            let html = '<h2>Results:</h2><ul>';
+            logs.forEach(log => {
+                html += `<li>Q${log.q}: ${log.choice} ${log.correct ? '(✓ Correct)' : '(✗ Wrong)'} - ${log.time}s</li>`;
+            });
+            html += `</ul><p><strong>Score: ${logs.filter(l=>l.correct).length}/12</strong></p>`;
+            document.getElementById('results').innerHTML = html;
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
